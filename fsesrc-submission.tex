@@ -1,4 +1,7 @@
-\documentclass{sigplanconf}
+\documentclass{sig-alternate-05-2015}
+
+\usepackage{pslatex}
+\usepackage{microtype}
 
 \usepackage{amsmath}
 \usepackage{listings}
@@ -36,11 +39,14 @@
 \setlength{\pdfpagewidth}{\paperwidth}
 
 \title{Preventing Errors in Numerical Computations}
-\subtitle{The Unsignedness Checker}
 
-\authorinfo{Christopher A. Mackie}
-           {University of Washington}
-           {mackic@cs.washington.edu}
+\numberofauthors{1} %  in this sample file, there are a *total*
+\author{
+Christopher A. Mackie\\
+       \affaddr{University of Washington Computer Science \& Engineering}\\
+       \affaddr{Seattle, WA, USA}\\
+       \email{mackic@cs.washington.edu}
+}
 
 \maketitle
 
@@ -146,15 +152,7 @@ To put the Unsignedness Checker to the test, we used it to analyse jake2, a Java
 
 \bibliographystyle{abbrvnat}
 
-% The bibliography should be embedded for final submission.
-
-\begin{thebibliography}{}
-\softraggedright
-
-\bibitem[Smith et~al.(2009)Smith, Jones]{smith02}
-P. Q. Smith, and X. Y. Jones. ...reference text...
-
-\end{thebibliography}
-
+\bibliographystyle{abbrv}
+\bibliography{bibstring-unabbrev,ernst,generals,invariants,types}
 
 \end{document}
