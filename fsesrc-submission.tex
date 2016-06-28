@@ -1,11 +1,11 @@
 \documentclass{sig-alternate-05-2015}
 
-\usepackage{pslatex}
-\usepackage{microtype}
-
 \usepackage{amsmath}
-\usepackage{listings}
 \usepackage{graphicx}
+\usepackage{listings}
+\usepackage{microtype}
+\usepackage{pslatex}
+\usepackage{relsize}
 
 \graphicspath{ {figures/} }
 
@@ -13,7 +13,7 @@
 % how it does comments and will change the formatting.
 \lstset{
     language=Java,
-    basicstyle=\ttfamily\small,
+    basicstyle=\sf,
     aboveskip={1.0\baselineskip},
     belowskip={1.0\baselineskip},
     columns=fixed,
@@ -38,7 +38,7 @@
 \setlength{\pdfpageheight}{\paperheight}
 \setlength{\pdfpagewidth}{\paperwidth}
 
-\title{Preventing Errors in Numerical Computations}
+\title{Preventing Signedness Errors in Numerical Computations}
 
 \numberofauthors{1} %  in this sample file, there are a *total*
 \author{
@@ -63,20 +63,24 @@ Christopher A. Mackie\\
 
 \section{Problem and Motivation}
 
-A large class of errors in software can be traced to the mishandling of unsigned integers, those represented at the bit level as pure base two integers. Such numbers are always non-negative and are used to allow for a larger positive range of values to be represented with fewer bits. Because only non-negative numbers can be represented with unsigned integers, the use case for them is often for low level systems applications, which are critical pieces of software. For this reason, C has supported unsigned integers for years, and Java 8 has included some support for unsigned integers in the form of utility methods.
+A signed integer uses the first bit of the machine representation to
+represent the sign (positive or negative).  An unsigned integer uses all
+bits of the machine representation to represent the value.  It can
+represent a larger range of positive numbers, but not negative numbers.
+Unsigned integers are useful, so many programming languages support them;
+for example, Java 8 provides utility methods for unsigned
+integers~\cite{JDK8UnsignedIntegerArithmetic2012}.  However, unsigned
+integers are also error-prone:  using an unsigned integer where a signed
+one is expected, or performing certain arithmetic operations and
+comparisons on unsigned integers, can lead to unexpected results.
 
-We will use the terms insensitive and sensitive in this paper to discuss operators. When we refer to insensitive operators, we mean operators whose implementations are agnostic to the signedness of their inputs and outputs, so long as signedness is consistent. Sensitive operators, conversely, must have different implementations for each signedness. See Listing 1 for an example of insensitive and sensitive operators.
-
-\begin{lstlisting}[caption=Example depicting subtraction\texttt{,} a sound operator\texttt{,} and division\texttt{,} an unsound operator.]
-byte x = 255;
-byte y = 254;
-
-byte sub = x - y;
-// Result is 1 which is correct for both interpretations of the output
-
-byte div = y / x;
-// Result is 2 which is correct only for the signed interpretation of the output
-\end{lstlisting}
+W call an operator ``insensitive'' if it produces a correct signed result
+when run on two signed values, and it produces a correct unsigned result
+when run on two unsigned values.  We call an operator ``sensitive'' if it
+produces incorrect results when run on two unsigned values.  For such
+operations, a programmer must run a different operator depending on whether
+the operands are signed or unsigned.  See Figure~\ref{fig:operators} for
+an example of insensitive and sensitive operators.
 
 Bugs concerning unsigned integers can be divided into three categories based on cause as follows:
 
@@ -86,11 +90,38 @@ Bugs concerning unsigned integers can be divided into three categories based on 
   \item Interchanging signed and unsigned integers in routine calls or outputs.
 \end{itemize}
 
-The first line of defense against most bugs is the compiler. When the compiler is unable to catch bugs it falls on the programmer to identify and eliminate them, which is prone to human error. Because Java does not have unsigned integers, its compiler has no concept of signedness; it is impossible to find any bugs related to using unsigned numbers at compile time using javac. Many programmers attempt to use unsigned numbers in their Java programs despite this, but such efforts are not directly supported by the language and therefore are subject to bugs which arise from human error.
+The first line of defense against most bugs is the compiler. When the
+compiler is unable to catch bugs it falls on the programmer to identify and
+eliminate them, which is prone to human error. Because Java's unsigned
+integers are not built in (they are supported by a library), the Java
+compiler is not helpful in finding bugs related to using unsigned
+numbers.
+
+\begin{figure}
+\smaller
+\begin{lstlisting}
+byte x = 255;
+byte y = 254;
+
+byte sub = x - y;
+// Result is 1 which is correct for both interpretations:
+//  * x, y, and sub are signed
+//  * x, y, and sub are unsigned
+
+byte div = y / x;
+// Result is 2.  This result is correct if x, y, and sub
+// are signed values.  This result is incorrect if x, y,
+// and sub are unsigned values.
+\end{lstlisting}
+\caption{Subtraction is an insensitive operator, and
+  division is a sensitive operator.}
+\label{fig:operators}
+\end{figure}
+
 
 \section{Approach and Uniqueness}
 
-Our approach to solving this issue is to use a type system. This allows us to build on Java's type system and javac's ability to process it in order to perform static analysis on the usage of unsigned integers in Java programs using pluggable type systems. This allows users to catch bugs before they become problems for their end-users. Type systems are a familiar concept to programmers, which allows our approach to be more easily adopted. We can also use error messages similar to those usually emitted from type systems, further adding to the ease of use of our solution to programmers familiar with type systems.
+Our approach to detecting and preventing signedness errors is to use a type system. This allows us to build on Java's type system and javac's ability to process it in order to perform static analysis on the usage of unsigned integers in Java programs using pluggable type systems. This allows users to catch bugs before they become problems for their end-users. Type systems are a familiar concept to programmers, which allows our approach to be more easily adopted. We can also use error messages similar to those usually emitted from type systems, further adding to the ease of use of our solution to programmers familiar with type systems.
 
 \begin{figure}
     \centering
@@ -149,8 +180,6 @@ The Checker Framework provides the groundwork for many similar type systems solv
 To put the Unsignedness Checker to the test, we used it to analyse jake2, a Java port of the popular '90s video game, Quake II. This case study is a large, complex piece of software, with many instances of unsigned integers being used in system code. Without applying annotations the Unsignedness Checker listed many percieved errors with using a logical right shift, sometimes called an unsigned right shift, on signed operands. Many of these were eliminated by annotating documented unsigned integers, but a few persisted. By comparing jake2 with the original C implementation, we have been able to identify and record semanitcal differences between the two systems, particularly in the usage of right shifts. Further analysis is required to determine if these differences have noticiable effects to end users. Furthermore, we have been able to identify one bug, in which an unsigned integer is passed to a utility function which prints its value during debugging. No special handling of the unsigned value is done, so it is printed as if signed, which can possibly lead to erroneous output for values outside signed positive range.
 
 % I will edit this to include examples of the semantic differences and possibly the bug
-
-\bibliographystyle{abbrvnat}
 
 \bibliographystyle{abbrv}
 \bibliography{bibstring-unabbrev,ernst,generals,invariants,types}
