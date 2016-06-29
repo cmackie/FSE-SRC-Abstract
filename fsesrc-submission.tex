@@ -206,29 +206,43 @@ specifically, here are the type introduction rules of our type system:
   \item Other non-integral expressions use the top type, \<@UnknownSignedness>.
 \end{enumerate}
 
-The real work of the Signedness Type System is done by its type rules, which eliminate the first two classes of bugs associated with unsigned integers. Generally speaking, these type rules are as follows:
+The type rules of the signedness type system issue a warning if a program
+might perform a computation using operands of incorrect or mixed signedness.
+These type rules are as follows:
 
 \begin{itemize}\itemsep 0pt \parskip 0pt
-  \item Unsigned values may not be used as input for sensitive operators, as such operators are implemented in Java for signed integers.
-  \item With the exception of shifts, no operator may take as input a mix of Signed and Unsigned values.
-  \item Logical right shifts may only be applied to Unsigned values.
-  \item Arithmetic right shifts may only be applied to Signed values.
+  \item Unsigned values may not be used as operands for sensitive
+    operators.
+  \item With the exception of shifts, no operator may operate on a mix of
+    Signed and Unsigned values.
+  \item Logical right shifts may only be applied to unsigned values.
+  \item Arithmetic right shifts may only be applied to signed values.
 \end{itemize}
 
-These rules prevent Unsigned numbers from being used in ways which would allow Java to incorrectly handle them. As ultimately unsigned integers are simply an alternative representation, we are concerned only that the representation is conserved. This means that the signed implementation of an insensitive operator may be used on an Unsigned value because the result is the same as if the unsigned implementation were used.
+An insensitive operator is allowed to be used on either signed or unsigned
+values, so long as all the operands are of the same type.  The operator's
+result type is the same as its argument types.
+
 
 \section{Background and Implementation}
 
 % I will go over this section later to include citations. Right now I just want to get words on paper.
 
-We seek here to build a verification tool, so that developers may use it to be sure that their software is free of bugs related to unsigned integers. This means that our approach must be sound; that if it says a program is free of bugs it is so. We build our solution on top of the Checker Framework, an API developed by the University of Washington to provide a platform for pluggable type systems to be introduced into a custom version of the javac compiler. This allows our type system to be checked concurrently with that of Java, and potentially other type systems.
+Our goal is to build a verification tool that guarantees that software is
+free of bugs related to unsigned integers. This means that our approach
+must be sound:  if it issues no warnings, then the program must be free of
+bugs.
+We built our Signedness Checker implementation using the 
+Checker Framework~\cite{Ernst2008,DietlDEMS2011}, which enables the
+construction of pluggable type systems for Java.
 
-The Checker Framework provides the groundwork for many similar type systems solving other common classes of bugs. Such verification tools, called checkers, provide an excellent template to follow when implementing a type system in this framework. We discussed the Signedness Type System, which at a high level consists of a series of qualifiers with some hierarchy, a series of introduction rules for determining expression types, and several type rules for issuing errors for malformed code. These parts are implemented in a checker as follows:
+Our pluggable type system implementaion consists of the following parts:
 
 \begin{itemize}\itemsep 0pt \parskip 0pt
-  \item Type qualifiers are implemented with type annotations. The Checker Framework provides several helper annotations to allow the structure of the type hierarchy and some introduction rules to be defined declaratively.
-  \item More complex introduction rules are used procedurally to determine the type of expression trees in the syntax tree using a type factory.
-  \item Type rules are enforced by a visitor which visits each node of the syntax tree to determine if it follows type rules.
+  \item Type qualifiers are implemented declaratively as Java 8 type
+    annotations~\cite{JSR308-PFD}.
+  \item Type indroduction rules are defined procedurally.
+  \item Type rules are enforced by a visitor which visits each node of the syntax tree.
 \end{itemize}
 
 Like other checkers included in the Checker Framework, such as the Nullness Checker, the Signedness Checker must conform to language specifications outside of its control. This can lead to tough design decisions which in turn may result in false negatives for one design, or false positives for another. Because the Signedness Checker is intended to be a sound tool, its design is always in favor of false negatives over false positives so that if the checker passes a program, that program is free of signedness bugs. This is a similar design strategy in other Checker Framework checkers, which provided us inspiration on how to consider the strength of the type system from a high level. The Signedness Checker is available with the \href{https://github.com/typetools/checker-framework}{Checker Framework}.
