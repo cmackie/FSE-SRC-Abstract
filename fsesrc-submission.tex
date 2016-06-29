@@ -74,7 +74,7 @@ an example of insensitive and sensitive operators.
 
 Bugs concerning unsigned integers can be divided into three categories based on cause as follows:
 
-\begin{itemize}
+\begin{itemize}\itemsep 0pt \parskip 0pt
   \item Using a sensitive operator with operands of opposite signedness to the implementation of the operator
   \item Mixing signed and unsigned integers while using any operator, sensitive or insensitive
   \item Interchanging signed and unsigned integers in routine calls or outputs.
@@ -123,7 +123,7 @@ Qualifiers in gray are used internally by the type system but should never be wr
 
 The Signedness Type System consists of one user defined type, and four internally used types, described in detail below:
 
-\begin{itemize}
+\begin{itemize}\itemsep 0pt \parskip 0pt
   \item The Unsigned type is the only user defined type. This is the only way it can be introduced into a program. This type signifies that a value is unsigned, that it is not to be put into any situation in which Java's default assumption of signed integers may place the program into a bad state.
   \item The Signed type is similarly meant for signed integers, which Java is free to interpret as it pleases. With the exception of logical right shifts, no operator restrictions are placed on Signed values by the Signedness Checker.
   \item The Constant type is for values which are known at compile time, and could potentially be signed or unsigned depending on how the programmer intends to use them. Even negative literals may be used as a convenience placeholder for a large positive unsigned integer, so we say a constant value is both signed and unsigned.
@@ -135,7 +135,7 @@ Furthermore, the type system prevents the third class of unsigned integer bugs, 
 
 Types are introduced into a program either by the user, for Unsigned values, or by the the Signedness Checker using its type introduction rules. Types are introduced as follows, noting that these checks are done in a defined order:
 
-\begin{enumerate}
+\begin{enumerate}\itemsep 0pt \parskip 0pt
   \item If a user has declared an expression to be Unsigned, then it is assigned this type.
   \item If an expression is not a leaf in the syntax tree (i.e. not a terminating symbol), its type is the least upper bound of the types in the tree rooted on it.
   \item If an expression is a constant at compile time, it is given the Constant type.
@@ -145,7 +145,7 @@ Types are introduced into a program either by the user, for Unsigned values, or 
 
 The real work of the Signedness Type System is done by its type rules, which eliminate the first two classes of bugs associated with unsigned integers. Generally speaking, these type rules are as follows:
 
-\begin{itemize}
+\begin{itemize}\itemsep 0pt \parskip 0pt
   \item Unsigned values may not be used as input for sensitive operators, as such operators are implemented in Java for signed integers.
   \item With the exception of shifts, no operator may take as input a mix of Signed and Unsigned values.
   \item Logical right shifts may only be applied to Unsigned values.
@@ -162,7 +162,7 @@ We seek here to build a verification tool, so that developers may use it to be s
 
 The Checker Framework provides the groundwork for many similar type systems solving other common classes of bugs. Such verification tools, called checkers, provide an excellent template to follow when implementing a type system in this framework. We discussed the Signedness Type System, which at a high level consists of a series of qualifiers with some hierarchy, a series of introduction rules for determining expression types, and several type rules for issuing errors for malformed code. These parts are implemented in a checker as follows:
 
-\begin{itemize}
+\begin{itemize}\itemsep 0pt \parskip 0pt
   \item Type qualifiers are implemented with type annotations. The Checker Framework provides several helper annotations to allow the structure of the type hierarchy and some introduction rules to be defined declaratively.
   \item More complex introduction rules are used procedurally to determine the type of expression trees in the syntax tree using a type factory.
   \item Type rules are enforced by a visitor which visits each node of the syntax tree to determine if it follows type rules.
