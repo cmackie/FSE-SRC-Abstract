@@ -27,7 +27,7 @@
 % how it does comments and will change the formatting.
 \lstset{
     language=Java,
-    basicstyle=\tt\footnotesize,
+    basicstyle=\sf\footnotesize,
     aboveskip={1.0\baselineskip},
     belowskip={1.0\baselineskip},
     columns=fixed,
@@ -44,6 +44,13 @@
     captionpos=b,
     escapeinside={\%*}{*)}
 }
+
+% \|name| or \mathid{name} denotes identifiers and slots in formulas
+\def\|#1|{\mathid{#1}}
+\newcommand{\mathid}[1]{\ensuremath{\mathit{#1}}}
+% \<name> or \codeid{name} denotes computer code identifiers
+\def\<#1>{\codeid{#1}}
+\protected\def\codeid#1{\ifmmode{\mbox{\sf{#1}}}\else{\sf #1}\fi}
 
 
 \begin{document}
@@ -86,23 +93,37 @@ operations, a programmer must run a different operator depending on whether
 the operands are signed or unsigned.  See Figure~\ref{fig:operators} for
 an example of insensitive and sensitive operators.
 
-Bugs concerning unsigned integers can be divided into three categories based on cause as follows:
+Misuse of unsigned values can be categorized as follows:
 
 \begin{itemize}\itemsep 0pt \parskip 0pt
-  \item Using a sensitive operator with operands of opposite signedness to the implementation of the operator
-  \item Mixing signed and unsigned integers while using any operator, sensitive or insensitive
-  \item Interchanging signed and unsigned integers in routine calls or outputs.
+  \item Using a sensitive operator or routine with operands of opposite signedness to the implementation of the operator.
+  \item Mixing signed and unsigned arguments to any operator, sensitive or insensitive.
 \end{itemize}
 
 The first line of defense against most bugs is the compiler. When the
 compiler is unable to catch bugs it falls on the programmer to identify and
-eliminate them, which is prone to human error. Because Java's unsigned
-integers are not built in (they are supported by a library), the Java
-compiler is not helpful in finding bugs related to using unsigned
-numbers.
+eliminate them, which is prone to human error. The compiler 
+is not helpful in finding bugs related to using unsigned
+numbers, because Java's unsigned
+integers are supported by a library rather than built into Java.
 
+
+\section{Approach and Uniqueness}
+
+Our approach to detecting and preventing signedness errors is to use a type
+system. This has a number of benefits.
+%
+Compile-time checking permits developers
+to catch bugs before they become problems for their end-users.
+%
+Type systems are a familiar to programmers, who understand how to use them
+and how to interpret their warning messages.
+%
+Type-checking is modular and fast.
+
+% Figure appears late in the LaTeX file to prevent it from being placed in
+% the first column of the paper.
 \begin{figure}
-\smaller
 \begin{lstlisting}
 byte x = 255;
 byte y = 254;
@@ -117,25 +138,24 @@ byte div = y / x;
 //  * Correct for signed x, y, and div.
 //  * Incorrect for unsigned x, y, and div.
 \end{lstlisting}
+\vspace{-10pt}
 \caption{Subtraction is an insensitive operator, and
   division is a sensitive operator.}
 \label{fig:operators}
 \end{figure}
 
 
-\section{Approach and Uniqueness}
-
-Our approach to detecting and preventing signedness errors is to use a type system. This allows us to build on Java's type system and javac's ability to process it in order to perform static analysis on the usage of unsigned integers in Java programs using pluggable type systems. This allows users to catch bugs before they become problems for their end-users. Type systems are a familiar concept to programmers, which allows our approach to be more easily adopted. We can also use error messages similar to those usually emitted from type systems, further adding to the ease of use of our solution to programmers familiar with type systems.
-
 \begin{figure}
     \centering
     \includegraphics[width=0.4\textwidth]{signedness}
     \caption{The type qualifier hierarchy of the signedness annotations.
-Qualifiers in gray are used internally by the type system but should never be written by a programmer.}
+The default annotation is \<@Signed>.
+Qualifiers in gray are used internally by the type system and need not be
+written by a programmer.}
     \label{fig:my_label}
 \end{figure}
 
-The Signedness Type System consists of one user defined type, and four internally used types, described in detail below:
+We have defined a signedness type system with 5 type qualifiers:
 
 \begin{itemize}\itemsep 0pt \parskip 0pt
   \item The Unsigned type is the only user defined type. This is the only way it can be introduced into a program. This type signifies that a value is unsigned, that it is not to be put into any situation in which Java's default assumption of signed integers may place the program into a bad state.
