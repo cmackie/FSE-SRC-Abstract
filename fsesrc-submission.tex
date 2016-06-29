@@ -232,6 +232,11 @@ Our goal is to build a verification tool that guarantees that software is
 free of bugs related to unsigned integers. This means that our approach
 must be sound:  if it issues no warnings, then the program must be free of
 bugs.
+This means that the tool can issue false positive alarms:  warnings about
+code that will not actually go wrong at run time.  This occurs when the
+Signed Checker cannot prove that the code is correct.\todo{Later, you
+  should give concrete examples of false alarms.}
+
 We built our Signedness Checker implementation using the 
 Checker Framework~\cite{Ernst2008,DietlDEMS2011}, which enables the
 construction of pluggable type systems for Java.
@@ -245,7 +250,9 @@ Our pluggable type system implementaion consists of the following parts:
   \item Type rules are enforced by a visitor which visits each node of the syntax tree.
 \end{itemize}
 
-Like other checkers included in the Checker Framework, such as the Nullness Checker, the Signedness Checker must conform to language specifications outside of its control. This can lead to tough design decisions which in turn may result in false negatives for one design, or false positives for another. Because the Signedness Checker is intended to be a sound tool, its design is always in favor of false negatives over false positives so that if the checker passes a program, that program is free of signedness bugs. This is a similar design strategy in other Checker Framework checkers, which provided us inspiration on how to consider the strength of the type system from a high level. The Signedness Checker is available with the \href{https://github.com/typetools/checker-framework}{Checker Framework}.
+The Signedness Checker is distributed as part of the Checker Framework
+\url{http://CheckerFramework.org/}, starting with version 2.1.0.
+
 
 \section{Results and Contributions}
 % I will go back through this section and cite where needed
