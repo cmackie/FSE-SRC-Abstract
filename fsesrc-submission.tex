@@ -104,7 +104,7 @@ byte x = 255;
 byte y = 254;
 
 byte sub = x - y;
-// Result is 1 which is correct for both interpretations:
+// Result is 1, which is correct for both interpretations:
 //  * x, y, and sub are signed
 //  * x, y, and sub are unsigned
 
@@ -136,7 +136,7 @@ The Unsignedness Type System consists of one user defined type, and four interna
 \begin{itemize}
   \item The Unsigned type is the only user defined type. This is the only way it can be introduced into a program. This type signifies that a value is unsigned, that it is not to be put into any situation in which Java's default assumption of signed integers may place the program into a bad state.
   \item The Signed type is similarly meant for signed integers, which Java is free to interpret as it pleases. With the exception of logical right shifts, no operator restrictions are placed on Signed values by the Unsignedness Checker.
-  \item The Constant type is for values which are known at compile time, and could potentially be signed or unsigned depending on how the programmer intends to use them. Even negative literals may be used as a convenience placeholder for a large positve unsigned integer, so we say a constant value is both signed and unsigned.
+  \item The Constant type is for values which are known at compile time, and could potentially be signed or unsigned depending on how the programmer intends to use them. Even negative literals may be used as a convenience placeholder for a large positive unsigned integer, so we say a constant value is both signed and unsigned.
   \item The UnknownSignedness type is for values which are either outside of the Unsignedness Checker's scope, or have been mixed so that the Unsignedness Checker no longer knows what signedness to assign to them. In the second case, the presence of an UnknownSignedness value almost always indicates an issue.
   \item The UnsignednessBottom type is never assigned to anything, and if this type is present in an AST, there is an issue.
 \end{itemize}
@@ -156,7 +156,7 @@ The real work of the Unsignedness Type System is done by its type rules, which e
   \item Arithmetic right shifts may only be applied to Signed values.
 \end{itemize}
 
-These rules prevent Unsigned numbers from being used in ways which would allow Java to incorrectly handle them. As ultimately unsigned integers are simply an alternitive representation, we are concerned only that the representation is conserved. This means that the signed implementation of an insensitive operator may be used on an Unsigned value because the result is the same as if the unsigned implementation were used.
+These rules prevent Unsigned numbers from being used in ways which would allow Java to incorrectly handle them. As ultimately unsigned integers are simply an alternative representation, we are concerned only that the representation is conserved. This means that the signed implementation of an insensitive operator may be used on an Unsigned value because the result is the same as if the unsigned implementation were used.
 
 \section{Background and Implementation}
 
@@ -168,8 +168,8 @@ The Checker Framework provides the groundwork for many similar type systems solv
 
 \begin{itemize}
   \item Type qualifiers are implemented with type annotations. The Checker Framework provides several helper annotations to allow the structure of the type hierarchy and some introduction rules to be defined declaratively.
-  \item More complex introduction rules are used proceduarally to determine the type of expression trees in the syntax tree using a type factory.
-  \item Type rules are enforced by a visitor which visists each node of the syntax tree to determine if it follows type rules.
+  \item More complex introduction rules are used procedurally to determine the type of expression trees in the syntax tree using a type factory.
+  \item Type rules are enforced by a visitor which visits each node of the syntax tree to determine if it follows type rules.
 \end{itemize}
 
 % It would probably be wise here to discuss other checkers and what we can learn from them
@@ -177,7 +177,7 @@ The Checker Framework provides the groundwork for many similar type systems solv
 \section{Results and Contributions}
 % I will go back through this section and cite where needed
 
-To put the Unsignedness Checker to the test, we used it to analyse jake2, a Java port of the popular '90s video game, Quake II. This case study is a large, complex piece of software, with many instances of unsigned integers being used in system code. Without applying annotations the Unsignedness Checker listed many percieved errors with using a logical right shift, sometimes called an unsigned right shift, on signed operands. Many of these were eliminated by annotating documented unsigned integers, but a few persisted. By comparing jake2 with the original C implementation, we have been able to identify and record semanitcal differences between the two systems, particularly in the usage of right shifts. Further analysis is required to determine if these differences have noticiable effects to end users. Furthermore, we have been able to identify one bug, in which an unsigned integer is passed to a utility function which prints its value during debugging. No special handling of the unsigned value is done, so it is printed as if signed, which can possibly lead to erroneous output for values outside signed positive range.
+To put the Unsignedness Checker to the test, we used it to analyze jake2, a Java port of the popular '90s video game, Quake II. This case study is a large, complex piece of software, with many instances of unsigned integers being used in system code. Without applying annotations the Unsignedness Checker listed many perceived errors with using a logical right shift, sometimes called an unsigned right shift, on signed operands. Many of these were eliminated by annotating documented unsigned integers, but a few persisted. By comparing jake2 with the original C implementation, we have been able to identify and record semantic differences between the two systems, particularly in the usage of right shifts. Further analysis is required to determine if these differences have noticeable effects to end users. Furthermore, we have been able to identify one bug, in which an unsigned integer is passed to a utility function which prints its value during debugging. No special handling of the unsigned value is done, so it is printed as if signed, which can possibly lead to erroneous output for values outside signed positive range.
 
 % I will edit this to include examples of the semantic differences and possibly the bug
 
@@ -185,3 +185,6 @@ To put the Unsignedness Checker to the test, we used it to analyse jake2, a Java
 \bibliography{bibstring-unabbrev,ernst,generals,invariants,types}
 
 \end{document}
+
+%  LocalWords:  papersize Signedness Mackie signedness javac's jake2 90s
+%  LocalWords:  UnknownSignedness UnsignednessBottom
