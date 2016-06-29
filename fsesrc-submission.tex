@@ -68,8 +68,9 @@ Christopher A. Mackie\\
 
 A signed integer uses the first bit of the machine representation to
 represent the sign (positive or negative).  An unsigned integer uses all
-bits of the machine representation to represent the value.  It can
-represent a larger range of positive numbers, but not negative numbers.
+bits of the machine representation to represent the value.
+An unsigned integer can represent a larger range of positive numbers, but
+cannot represent negative numbers.
 Unsigned integers are useful, so many programming languages support them;
 for example, Java 8 provides utility methods for unsigned
 integers~\cite{JDK8UnsignedIntegerArithmetic2012}.  However, unsigned
@@ -108,13 +109,13 @@ byte y = 254;
 
 byte sub = x - y;
 // Result is 1, which is correct when:
-//  * x, y, and sub are signed
-//  * x, y, and sub are unsigned
+//  * x, y, and sub are signed.
+//  * x, y, and sub are unsigned.
 
 byte div = y / x;
 // Result is 2.
-//  * Correct for signed x, y, and sub
-//  * Incorrect for unsigned x, y, and sub
+//  * Correct for signed x, y, and div.
+//  * Incorrect for unsigned x, y, and div.
 \end{lstlisting}
 \caption{Subtraction is an insensitive operator, and
   division is a sensitive operator.}
