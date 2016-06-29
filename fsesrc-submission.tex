@@ -10,6 +10,21 @@
 
 \graphicspath{ {figures/} }
 
+% Add page numbers, remove copyright box.  For submitted version only.
+\pagenumbering{arabic}
+\makeatletter
+\def\@copyrightspace{\relax}
+\makeatother
+
+% At least 80% of every float page must be taken up by
+% floats; there will be no page with more than 20% white space.
+\def\topfraction{.8}
+\def\dbltopfraction{\topfraction}
+\def\floatpagefraction{\topfraction}     % default .5
+\def\dblfloatpagefraction{\topfraction}  % default .5
+\def\textfraction{.2}
+
+
 % I copied some formatting settings from another template I have used for homework in the past, but I don't like
 % how it does comments and will change the formatting.
 \lstset{
