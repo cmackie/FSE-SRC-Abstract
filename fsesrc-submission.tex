@@ -13,7 +13,7 @@
 % how it does comments and will change the formatting.
 \lstset{
     language=Java,
-    basicstyle=\sf,
+    basicstyle=\tt\footnotesize,
     aboveskip={1.0\baselineskip},
     belowskip={1.0\baselineskip},
     columns=fixed,
@@ -50,17 +50,6 @@ Christopher A. Mackie\\
 
 \maketitle
 
-% I was mostly aiming to get concepts on paper with this draft. Therefore at this time I am more
-% concerned with content than structure. I don't know how much I should focus on the tool itself.
-% I think the unique part of this project concerns the construction of a type system which conforms
-% to Java's language specifications concerning signedness, that is the assumption that everything is
-% signed. I've tried to focus on the type system because of this, but I think I should probably say
-% more about the tool. I'm not sure if Approach and Uniqueness should include more content on the
-% tool, or if that is best kept for Results and Contributions. I don't know how much background to
-% give about unsigned numbers themselves since most people know them, but they are often hidden
-% behind several layers of abstraction so maybe a brief blurb like below is necessary to jog
-% memories.
-
 \section{Problem and Motivation}
 
 A signed integer uses the first bit of the machine representation to
@@ -74,7 +63,7 @@ integers are also error-prone:  using an unsigned integer where a signed
 one is expected, or performing certain arithmetic operations and
 comparisons on unsigned integers, can lead to unexpected results.
 
-W call an operator ``insensitive'' if it produces a correct signed result
+We call an operator ``insensitive'' if it produces a correct signed result
 when run on two signed values, and it produces a correct unsigned result
 when run on two unsigned values.  We call an operator ``sensitive'' if it
 produces incorrect results when run on two unsigned values.  For such
@@ -104,14 +93,14 @@ byte x = 255;
 byte y = 254;
 
 byte sub = x - y;
-// Result is 1, which is correct for both interpretations:
+// Result is 1, which is correct when:
 //  * x, y, and sub are signed
 //  * x, y, and sub are unsigned
 
 byte div = y / x;
-// Result is 2.  This result is correct if x, y, and sub
-// are signed values.  This result is incorrect if x, y,
-// and sub are unsigned values.
+// Result is 2.
+//  * Correct for signed x, y, and sub
+//  * Incorrect for unsigned x, y, and sub
 \end{lstlisting}
 \caption{Subtraction is an insensitive operator, and
   division is a sensitive operator.}
@@ -143,9 +132,15 @@ The Signedness Type System consists of one user defined type, and four internall
 
 Furthermore, the type system prevents the third class of unsigned integer bugs, the interchange of signed and unsigned integers, by the nature of its hierarchy, shown in Figure~\ref{fig:my_label}.
 
-Types are introduced into a program either by the user, for Unsigned values, or by the the Signedness Checker using its type introduction rules. The type introduction rules are best understood through Figure 2, which depicts a flow chart for determining the type of an expression.
+Types are introduced into a program either by the user, for Unsigned values, or by the the Signedness Checker using its type introduction rules. Types are introduced as follows, noting that these checks are done in a defined order:
 
-% I haven't created the flow chart yet but I think it would be a good way to visually show the introduction rules.
+\begin{enumerate}
+  \item If a user has declared an expression to be Unsigned, then it is assigned this type.
+  \item If an expression is not a leaf in the syntax tree (i.e. not a terminating symbol), its type is the least upper bound of the types in the tree rooted on it.
+  \item If an expression is a constant at compile time, it is given the Constant type.
+  \item If an expression is an integral type, for which signedness must be considered, it is given the Signed type.
+  \item If no other type was assigned to an expression, it's signedness is not known to the Signedness Checker and it is given the top type, UnknownSignedness.
+\end{enumerate}
 
 The real work of the Signedness Type System is done by its type rules, which eliminate the first two classes of bugs associated with unsigned integers. Generally speaking, these type rules are as follows:
 
@@ -172,14 +167,12 @@ The Checker Framework provides the groundwork for many similar type systems solv
   \item Type rules are enforced by a visitor which visits each node of the syntax tree to determine if it follows type rules.
 \end{itemize}
 
-% It would probably be wise here to discuss other checkers and what we can learn from them
+Like other checkers included in the Checker Framework, such as the Nullness Checker, the Signedness Checker must conform to language specifications outside of its control. This can lead to tough design decisions which may lead to false negatives one way, or false positives another way. Because the Signedness Checker is intended to be a sound tool, its design is always in favor of false negatives so that if the checker passes a program, that program is free of signedness bugs. This is a similar design strategy in other Checker Framework checkers, which provided us inspiration on how to consider the strength of the type system from a high level.
 
 \section{Results and Contributions}
 % I will go back through this section and cite where needed
 
-To put the Signedness Checker to the test, we used it to analyze jake2, a Java port of the popular '90s video game, Quake II. This case study is a large, complex piece of software, with many instances of unsigned integers being used in system code. Without applying annotations the Signedness Checker listed many perceived errors with using a logical right shift, sometimes called an unsigned right shift, on signed operands. Many of these were eliminated by annotating documented unsigned integers, but a few persisted. By comparing jake2 with the original C implementation, we have been able to identify and record semantic differences between the two systems, particularly in the usage of right shifts. Further analysis is required to determine if these differences have noticeable effects to end users. Furthermore, we have been able to identify one bug, in which an unsigned integer is passed to a utility function which prints its value during debugging. No special handling of the unsigned value is done, so it is printed as if signed, which can possibly lead to erroneous output for values outside signed positive range.
-
-% I will edit this to include examples of the semantic differences and possibly the bug
+To put the Signedness Checker to the test, we used it to analyze jake2, a Java port of the popular '90s video game, Quake II. This case study is a large, complex piece of software, with many instances of unsigned integers being used in system code. Without applying annotations the Signedness Checker listed many perceived errors with using a logical right shift, sometimes called an unsigned right shift, on signed operands. Many of these were eliminated by annotating documented unsigned integers, but a few persisted. By comparing jake2 with the original C implementation, we have been able to identify and record semantic differences between the two systems, particularly in the usage of right shifts. In detail, the jake2 implementation uses logical right shifts on Signed values in many locations where the C implementation used arithmetic right shifts. It is possible that if a negative value passed to such regions of code that the two implementations will behave differently in a way noticible to the end-user. Further analysis is required to determine if these differences indeed have noticeable effects. Furthermore, we have been able to identify one bug, in which an unsigned integer is passed to a utility function which prints its value during debugging. No special handling of the unsigned value is done, so it is printed as if signed, which can possibly lead to erroneous output for values outside signed positive range.
 
 \bibliographystyle{abbrv}
 \bibliography{bibstring-unabbrev,ernst,generals,invariants,types}
