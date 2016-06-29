@@ -167,7 +167,7 @@ The Checker Framework provides the groundwork for many similar type systems solv
   \item Type rules are enforced by a visitor which visits each node of the syntax tree to determine if it follows type rules.
 \end{itemize}
 
-Like other checkers included in the Checker Framework, such as the Nullness Checker, the Signedness Checker must conform to language specifications outside of its control. This can lead to tough design decisions which may lead to false negatives one way, or false positives another way. Because the Signedness Checker is intended to be a sound tool, its design is always in favor of false negatives so that if the checker passes a program, that program is free of signedness bugs. This is a similar design strategy in other Checker Framework checkers, which provided us inspiration on how to consider the strength of the type system from a high level.
+Like other checkers included in the Checker Framework, such as the Nullness Checker, the Signedness Checker must conform to language specifications outside of its control. This can lead to tough design decisions which in turn may result in false negatives for one design, or false positives for another. Because the Signedness Checker is intended to be a sound tool, its design is always in favor of false negatives over false positives so that if the checker passes a program, that program is free of signedness bugs. This is a similar design strategy in other Checker Framework checkers, which provided us inspiration on how to consider the strength of the type system from a high level.
 
 \section{Results and Contributions}
 % I will go back through this section and cite where needed
