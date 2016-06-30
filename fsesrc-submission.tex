@@ -263,28 +263,29 @@ alarm, from our case study of jake2.}
 
 \section{Results and Contributions}
 
-To put the Signedness Checker to the test, we used it to analyze jake2, a Java
-port of the popular '90s video game, Quake II. This case study is a large,
-complex piece of software, with many instances of unsigned integers being used
-in system code. Without applying annotations the Signedness Checker listed many
-perceived errors with using a logical right shift, sometimes called an unsigned
-right shift, on signed operands. Many of these were eliminated by annotating
-documented unsigned integers, but a few persisted. By comparing jake2 with the
-original C implementation, we have been able to identify and record semantic
-differences between the two systems, particularly in the usage of right shifts.
-In detail, the jake2 implementation uses logical right shifts on \<@Signed> values
-in many locations where the C implementation used arithmetic right shifts. We have
-identified several cases in which this difference has no actual effect, as in the
-example used in Figure~\ref{fig:false-alarm}, but it
-is possible that if a negative value is passed to such regions of code that the
-two implementations will behave differently in a way noticible to the end-user.
-Further analysis is required to determine if any of these differences have
-noticeable effects. Furthermore, we have been able to identify one bug,
-depicted in Figure~\ref{fig:bug}, in which
-unsigned integers are passed to a utility function which prints their values during
-debugging. No special handling of the unsigned values is done, so they are printed as
-if signed, which can possibly lead to erroneous output for values outside signed
+We evaluated the Signedness Checker by running it on jake2, a Java
+port of the popular '90s video game, Quake II\@.  The original C
+implementation of Quake II used unsigned integers, and the jake2 port
+tries to mimic Quake II's usage.
+jake2 consists of \todo{give a concrete number} lines of code.
+We wrote \todo{how many?} \<@Unsigned> annotations, referring to the
+C implementation when we had questions about the Java developers' intent.
+
+The largest inconsistency between the C and Java implementations is that
+jake2 uses logical right shift operations 
+in many locations where the C implementation used arithmetic right shift
+operations.  The Signedness Checker identified these for us.
+In some cases, either shift operation is correct because both have the same
+effect.  An example is Figure~\ref{fig:false-alarm}.  In the future, we
+plan to enhance the Signedness Checker so it does not issue this false
+positive warning.
+
+We also identified one bug (Figure~\ref{fig:bug}):
+unsigned integers are printed by a function that does no special handling
+of unsigned values is done.  Thus, they are printed as
+if signed, which leads to erroneous output for values outside the signed
 positive range.
+
 
 \section{Conclusions}
 
