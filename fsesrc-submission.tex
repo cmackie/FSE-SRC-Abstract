@@ -243,12 +243,11 @@ Our pluggable type system implementaion consists of the following parts:
 
 \begin{figure}
 \begin{lstlisting}
-// The Signedness Checker issues a warning
-// for each of the following lines because
-// a signed int is right-shifted with an
-// unsigned right shift. In reality this is
-// fine because all of the introduced bits
-// are masked off.
+// The Signedness Checker issues a warning for
+// each of the following lines because a signed
+// int is right-shifted with an unsigned right
+// shift. In reality this is fine because all
+// of the introduced bits are masked off.
 
 sb.data[i++] = (byte) ((c >>> 8) & 0xff);
 sb.data[i++] = (byte) ((c >>> 16) & 0xff);
@@ -289,13 +288,15 @@ positive range.
 
 \section{Conclusions}
 
-In conclusion, we have developed a type system, the Signedness Type System, to
-encapsulate all the necessary information to examine the usage of signed and unsigned
-integers in Java programs. This type system is implemented with the Signedness
-Checker in the Checker Framework to allow Java programs to be type checked with this
-system. This allows us to statically analyze Java programs, ensuring that if they
-type check under our type system, that they are free of bugs related to unsigned
-integers in Java.
+We have developed and implemented a type system, the Signedness Type System, that
+coptures usage of signed and unsigned
+integers in Java programs.
+This type system enables developers to detect errors regarding unsigned
+integers at compile time, and guarantees that such errors cannot occur at
+run time.
+In a case study. our type system proved easy to use and detected a
+previously unknown bug.
+
 
 \begin{figure}
 \begin{lstlisting}
