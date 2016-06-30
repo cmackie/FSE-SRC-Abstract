@@ -228,6 +228,8 @@ for an example of code for which the Signedness Checker may issue a false alarm.
 We built our Signedness Checker implementation using the
 Checker Framework~\cite{Ernst2008,DietlDEMS2011}, which enables the
 construction of pluggable type systems for Java.
+The Signedness Checker is distributed as part of the Checker Framework
+\url{http://CheckerFramework.org/}, starting with version 2.1.0.
 
 Our pluggable type system implementaion consists of the following parts:
 
@@ -238,8 +240,6 @@ Our pluggable type system implementaion consists of the following parts:
   \item Type rules are enforced by a visitor which visits each node of the syntax tree.
 \end{itemize}
 
-The Signedness Checker is distributed as part of the Checker Framework
-\url{http://CheckerFramework.org/}, starting with version 2.1.0.
 
 \begin{figure}
 \begin{lstlisting}
