@@ -78,9 +78,9 @@ Christopher A. Mackie\\
 \section{Problem and Motivation}
 
 A signed integer uses the first bit of the machine representation to
-represent the sign (positive or negative).  An unsigned integer uses all
-bits of the machine representation to represent the value.
-An unsigned integer can represent a larger range of positive numbers, but
+represent the sign (positive or negative) of a value.  An unsigned integer uses all
+bits of the machine representation to represent a value.
+An unsigned integer can represent a larger range of positive numbers than a signed integer, but
 cannot represent negative numbers.
 Unsigned integers are useful, so many programming languages support them;
 for example, Java 8 provides utility methods for unsigned
@@ -93,7 +93,7 @@ We call an operator ``insensitive'' if it produces a correct signed result
 when run on two signed values, and it produces a correct unsigned result
 when run on two unsigned values.  We call an operator ``sensitive'' if it
 produces incorrect results when run on two unsigned values.  For such
-operations, a programmer must run a different operator depending on whether
+operations, a programmer must run a different implementation of the operator depending on whether
 the operands are signed or unsigned.  See Figure~\ref{fig:operators} for
 an example of insensitive and sensitive operators.
 
@@ -106,7 +106,7 @@ Misuse of unsigned values can be categorized as follows:
 
 The first line of defense against most bugs is the compiler. When the
 compiler is unable to catch bugs it falls on the programmer to identify and
-eliminate them, which is prone to human error. The compiler
+eliminate them, which is prone to human error. The Java compiler
 is not helpful in finding bugs related to using unsigned
 numbers, because Java's unsigned
 integers are supported by a library rather than built into Java.
@@ -260,18 +260,19 @@ alarm, from our case study of jake2.}
 \label{fig:false-alarm}
 \end{figure}
 
+\newpage
 \section{Results and Contributions}
 
 We evaluated the Signedness Checker by running it on jake2, a Java
 port of the popular '90s video game, Quake II\@.  The original C
 implementation of Quake II used unsigned integers, and the jake2 port
 tries to mimic Quake II's usage.
-jake2 consists of \todo{give a concrete number} lines of code.
-We wrote \todo{how many?} \<@Unsigned> annotations, referring to the
+jake2 consists of 133513 lines of code and can be found at \url{https://github.com/mbien/jake2}.
+We wrote 33 \<@Unsigned> annotations, referring to the
 C implementation when we had questions about the Java developers' intent.
 
 The largest inconsistency between the C and Java implementations is that
-jake2 uses logical right shift operations 
+jake2 uses logical right shift operations
 in many locations where the C implementation used arithmetic right shift
 operations.  The Signedness Checker identified these for us.
 In some cases, either shift operation is correct because both have the same
@@ -281,7 +282,7 @@ positive warning.
 
 We also identified one bug (Figure~\ref{fig:bug}):
 unsigned integers are printed by a function that does no special handling
-of unsigned values is done.  Thus, they are printed as
+of unsigned values.  Thus, they are printed as
 if signed, which leads to erroneous output for values outside the signed
 positive range.
 
@@ -289,7 +290,7 @@ positive range.
 \section{Conclusions}
 
 We have developed and implemented a type system, the Signedness Type System, that
-coptures usage of signed and unsigned
+captures usage of signed and unsigned
 integers in Java programs.
 This type system enables developers to detect errors regarding unsigned
 integers at compile time, and guarantees that such errors cannot occur at
@@ -324,6 +325,26 @@ if (debugloadmap) {
 
 \bibliographystyle{abbrv}
 \bibliography{bibstring-unabbrev,ernst,generals,invariants,types}
+
+\begin{thebibliography}{9}
+
+  \bibitem{JDK8UnsignedIntegerArithmetic2012}
+  Joseph Darcy. Unsigned Integer Arithmetic API now in JDK 8. \url{https://blogs.oracle.com/darcy/entry/unsigned_api}, Jan. 20, 2012.
+
+  \bibitem{Ernst2008}
+  Matthew M. Papi, Mahmood Ali, Telmo Luis Correa Jr., Jeff H. Perkins, and
+  Michael D. Ernst. Practical Pluggable Types for Java. In ISSTA, July 2008.
+
+  \bibitem{DietlDEMS2011}
+  Werner Dietl, Stephanie Dietzel, Michael D. Ernst, Kıvanç Muslu, and Todd W. Schiller.
+  Building and Using Pluggable Type Checkers. In ICSE, May 2011.
+
+  \bibitem{JSR308-PFD}
+  Michael D. Ernst. Type Annotations Specification (JSR 308). \url{https://types.cs.washington.edu/jsr308/specification/java-annotation-design.pdf},
+  May 2, 2013.
+
+
+\end{thebibliography}
 
 \end{document}
 
