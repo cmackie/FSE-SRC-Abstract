@@ -226,7 +226,7 @@ Signed Checker cannot prove that the code is correct. See Figure~\ref{fig:false-
 for an example of code for which the Signedness Checker may issue a false alarm.
 
 We built our Signedness Checker implementation using the
-Checker Framework~\cite{Ernst2008,DietlDEMS2011}, which enables the
+Checker Framework~\cite{PapiACPE2008,DietlDEMS2011}, which enables the
 construction of pluggable type systems for Java.
 The Signedness Checker is distributed as part of the Checker Framework
 \url{http://CheckerFramework.org/}, starting with version 2.1.0.
@@ -287,6 +287,24 @@ if signed, which leads to erroneous output for values outside the signed
 positive range.
 
 
+\section{Related Work}
+
+SmartFuzz~\cite{MolnarLW2009} generates tests that are intended to expose
+integer bugs, including signed/unsigned conversion.  For each program
+execution, it generates and solves a set of contraints that assigns each
+integer to a lattice containing Top, Signed, Unsigned, and Bottom.
+SmartFuzz incorrectly under-constrains some operations such as x86's
+\<IMUL>.  It uses Valgrind to partition integers into union-find sets and
+garbage-collects them, an implementation strategy pioneered by
+DynComp~\cite{GuoPME2006}.  They report finding 5 likely distinct bugs in C
+programs.  As with any testing tool, SmartFuzz gives no guarantee about
+future executions.  The same authors' CatchConv tool~\cite{MolnarW2007}
+also does run-time type inference, focusing on integer conversion errors
+and utilizing symbolic execution.  Our approach is more lightweight and
+precise and gives a guarantee, but it requires programmers to write a few
+annotations in their code.
+
+
 \section{Conclusions}
 
 We have developed and implemented a type system, the Signedness Type System, that
@@ -325,26 +343,6 @@ if (debugloadmap) {
 
 \bibliographystyle{abbrv}
 \bibliography{bibstring-unabbrev,ernst,generals,invariants,types}
-
-\begin{thebibliography}{9}
-
-  \bibitem{JDK8UnsignedIntegerArithmetic2012}
-  Joseph Darcy. Unsigned Integer Arithmetic API now in JDK 8. \url{https://blogs.oracle.com/darcy/entry/unsigned_api}, Jan. 20, 2012.
-
-  \bibitem{Ernst2008}
-  Matthew M. Papi, Mahmood Ali, Telmo Luis Correa Jr., Jeff H. Perkins, and
-  Michael D. Ernst. Practical Pluggable Types for Java. In ISSTA, July 2008.
-
-  \bibitem{DietlDEMS2011}
-  Werner Dietl, Stephanie Dietzel, Michael D. Ernst, Kıvanç Muslu, and Todd W. Schiller.
-  Building and Using Pluggable Type Checkers. In ICSE, May 2011.
-
-  \bibitem{JSR308-PFD}
-  Michael D. Ernst. Type Annotations Specification (JSR 308). \url{https://types.cs.washington.edu/jsr308/specification/java-annotation-design.pdf},
-  May 2, 2013.
-
-
-\end{thebibliography}
 
 \end{document}
 
