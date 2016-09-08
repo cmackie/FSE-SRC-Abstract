@@ -88,12 +88,12 @@ for example, Java 8 introduced utility methods for unsigned
 integers~\cite{JDK8UnsignedIntegerArithmetic2012}.  However, unsigned
 integers are also
 error-prone:  using an unsigned integer where a signed
-one is expected, or performing certain arithmetic operations and
+one is expected, or performing certain arithmetic operations or
 comparisons on unsigned integers, can lead to unexpected results.
 
 We call an operator ``insensitive'' if it produces a correct signed result
 when run on two signed values and a correct unsigned result
-when run on two unsigned values. Conversely, we call an operator ``sensitive'' if it
+when run on two unsigned values.  We call an operator ``sensitive'' if it
 produces incorrect results when run on two unsigned values.  For such
 operations, a programmer must run a different implementation depending on whether
 the operands are signed or unsigned.  See Figure~\ref{fig:operators} for
@@ -127,7 +127,7 @@ and how to interpret their warning messages.
 
 % Figure appears late in the LaTeX file to prevent it from being placed in
 % the first column of the paper.
-\begin{figure}[b]
+\begin{figure}[t]
 \vspace{-10pt}
 \begin{lstlisting}
 byte x = 0xFF; // Signed -1, Unsigned 255
