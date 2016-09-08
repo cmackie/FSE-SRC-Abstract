@@ -15,7 +15,7 @@
 
 
 % Add page numbers, remove copyright box.  For submitted version only.
-\pagenumbering{arabic}
+% \pagenumbering{arabic}
 \makeatletter
 \def\@copyrightspace{\relax}
 \makeatother
@@ -31,12 +31,12 @@
 
 \lstset{
     language=Java,
-    basicstyle=\sf\footnotesize,
+    basicstyle=\linespread{0.8}\sf\small,
     aboveskip={1.0\baselineskip},
     belowskip={1.0\baselineskip},
     columns=fixed,
     extendedchars=true,
-    breaklines=true,
+    breaklines=false,
     tabsize=4,
     prebreak=\raisebox{0ex}[0ex][0ex]{\ensuremath{\hookleftarrow}},
     showtabs=false,
@@ -77,30 +77,30 @@ Christopher A. Mackie\\
 
 \section{Problem and Motivation}
 
-A signed integer uses the first bit of the machine representation to
-represent the sign (positive or negative) of a value.  An unsigned integer uses all
-bits of the machine representation to represent a value.
-An unsigned integer can represent a larger range of positive numbers than a signed integer, but
-cannot represent negative numbers.
+Signed integers use the first bit of the machine representation to
+represent the sign of a value.  Unsigned integers use all
+bits of the machine representation to represent the magnitude of a value allowing them to
+represent a larger range of positive numbers than signed integers at the cost of
+representing negative numbers.
 Unsigned integers are useful, so many programming languages support them;
 for example, Java 8 provides utility methods for unsigned
-integers~\cite{JDK8UnsignedIntegerArithmetic2012}.  However, unsigned
-integers are also error-prone:  using an unsigned integer where a signed
+integers~\cite{JDK8UnsignedIntegerArithmetic2012}.  However, they are also
+error-prone; using an unsigned integer where a signed
 one is expected, or performing certain arithmetic operations and
 comparisons on unsigned integers, can lead to unexpected results.
 
 We call an operator ``insensitive'' if it produces a correct signed result
-when run on two signed values, and it produces a correct unsigned result
-when run on two unsigned values.  We call an operator ``sensitive'' if it
+when run on two signed values and a correct unsigned result
+when run on two unsigned values. Conversely, we call an operator ``sensitive'' if it
 produces incorrect results when run on two unsigned values.  For such
-operations, a programmer must run a different implementation of the operator depending on whether
+operations, a programmer must run a different implementation depending on whether
 the operands are signed or unsigned.  See Figure~\ref{fig:operators} for
 an example of insensitive and sensitive operators.
 
 Misuse of unsigned values can be categorized as follows:
 
 \begin{itemize}\itemsep 0pt \parskip 0pt
-  \item Using a sensitive operator or routine with operands of opposite signedness to the implementation of the operator.
+  \item Using a sensitive operator with operands of opposite signedness to the implementation of the operator.
   \item Mixing signed and unsigned arguments to any operator, sensitive or insensitive.
 \end{itemize}
 
@@ -108,7 +108,7 @@ The first line of defense against most bugs is the compiler. When the
 compiler is unable to catch bugs it falls on the programmer to identify and
 eliminate them, which is prone to human error. The Java compiler
 is not helpful in finding bugs related to using unsigned
-numbers, because Java's unsigned
+numbers because Java's unsigned
 integers are supported by a library rather than built into Java.
 
 
@@ -120,14 +120,12 @@ system. This has a number of benefits.
 Compile-time checking permits developers
 to catch bugs before they become problems for their end-users.
 %
-Type systems are a familiar to programmers, who understand how to use them
+Type systems are familiar to programmers, who understand how to use them
 and how to interpret their warning messages.
-%
-Furthermore, type-checking is modular and fast.
 
 % Figure appears late in the LaTeX file to prevent it from being placed in
 % the first column of the paper.
-\begin{figure}
+\begin{figure}[b]
 \vspace{-10pt}
 \begin{lstlisting}
 byte x = 0xFF; // Signed -1, Unsigned 255
@@ -149,42 +147,28 @@ byte div = y / x;
 \label{fig:operators}
 \end{figure}
 
-
-\begin{figure}
-    \centering
-    \includegraphics[width=0.4\textwidth]{signedness}
-\vspace{-10pt}
-    \caption{The type qualifier hierarchy of the signedness annotations.
-The default annotation is \<@Signed>.
-Qualifiers in gray are used internally by the type system and need not be
-written by a programmer.}
-    \label{fig:type-hierarchy}
-\end{figure}
-
 We have defined a signedness type system with five type qualifiers
 (Figure~\ref{fig:type-hierarchy}).  Each type qualifier is written together
 with a base type; for example, \<@Unsigned int i> declares a
 variable named \<i> of type \<@Unsigned int>.
 
 \begin{itemize}\itemsep 0pt \parskip 0pt
-  \item \<@Unsigned> signifies that a value is interpreted as unsigned.
-  \item \<@Signed> signifies that a value is interpreted as signed.
+  \item \<@UnknownSignedness> indicates a value for which the
+    Signedness Checker has no estimate.  (This usually leads to a
+    type-checking warning.)  It is also used for non-numeric
+    values, which the Signedness Checker ignores.
+  \item \<@Unsigned> and \<@Signed> signify a value's signedness.
   \item \<@Constant> is for values known at compile time, such as
     manifest literals in the source code.  The programmer might intend to
     use them as signed or as unsigned values.  Even a negative literal may
     be used as a convenience placeholder for a large positive unsigned
     integer.
-  \item \<@UnknownSignedness> indicates a value for which the
-    Signedness Checker has no estimate.  (This usually leads to a
-    type-checking warning.)  It is also used for non-numeric
-    values, which the Signedness Checker ignores.
   \item \<@SignednessBottom> indicates dead code or the \<null> value.
 \end{itemize}
 
 The programmer writes \<@Unsigned> type qualifiers within field and method
 declarations in the program's source code.  Unannotated Java types within
-field and method signatures are given a default qualifier (usually
-\<@Signed>).  Type uses within method bodies are inferred.  More
+field and method signatures are given a default qualifier.  More
 specifically, here are the type introduction rules of our type system:
 
 \begin{enumerate}\itemsep 0pt \parskip 0pt
@@ -204,7 +188,7 @@ These type rules are as follows:
   \item Unsigned values may not be used as operands for sensitive
     operators.
   \item With the exception of shifts, no operator may operate on a mix of
-    Signed and Unsigned values.
+    signed and unsigned values.
   \item Logical right shifts may only be applied to unsigned values.
   \item Arithmetic right shifts may only be applied to signed values.
 \end{itemize}
@@ -213,6 +197,16 @@ An insensitive operator is allowed to be used on either signed or unsigned
 values, so long as all the operands are of the same type.  In general, an operator's
 result type is the least upper bound of its argument types.
 
+\begin{figure}
+    \centering
+    \includegraphics[width=0.4\textwidth]{signedness}
+\vspace{-10pt}
+    \caption{The type qualifier hierarchy of the signedness annotations.
+The default annotation is \<@Signed>.
+Qualifiers in gray are used internally by the type system and should not be
+written by a programmer.}
+    \label{fig:type-hierarchy}
+\end{figure}
 
 \section{Background and Implementation}
 
@@ -220,9 +214,9 @@ Our goal is to build a verification tool that guarantees that software is
 free of bugs related to unsigned integers. To achieve this, our approach
 must be sound:  if it issues no warnings, then the program must be free of
 bugs.
-This means that the tool can issue false positive alarms:  warnings about
+This means that the tool may issue false positive alarms:  warnings about
 code that will not actually go wrong at run time.  This occurs when the
-Signed Checker cannot prove that the code is correct. See Figure~\ref{fig:false-alarm}
+Signedness Checker cannot prove that the code is correct. See Figure~\ref{fig:false-alarm}
 for an example of code for which the Signedness Checker may issue a false alarm.
 
 We built our Signedness Checker implementation using the
@@ -237,38 +231,17 @@ Our pluggable type system implementaion consists of the following parts:
   \item Type qualifiers are implemented declaratively as Java 8 type
     annotations~\cite{JSR308-PFD}.
   \item Type indroduction rules are defined procedurally.
-  \item Type rules are enforced by a visitor which visits each node of the syntax tree.
+  \item Type rules are enforced by a traversal of the syntax tree.
 \end{itemize}
 
-
-\begin{figure}
-\begin{lstlisting}
-// The Signedness Checker issues a warning for
-// each of the following lines because a signed
-// int is right-shifted with an unsigned right
-// shift. In reality this is fine because all
-// of the introduced bits are masked off.
-
-sb.data[i++] = (byte) ((c >>> 8) & 0xff);
-sb.data[i++] = (byte) ((c >>> 16) & 0xff);
-sb.data[i++] = (byte) ((c >>> 24) & 0xff);
-
-\end{lstlisting}
-\vspace{-10pt}
-\caption{An example of code for which the Signedness Checker will issue a false
-alarm, from our case study of jake2.}
-\label{fig:false-alarm}
-\end{figure}
-
-\newpage
 \section{Results and Contributions}
 
 We evaluated the Signedness Checker by running it on jake2, a Java
 port of the popular '90s video game, Quake II\@.  The original C
-implementation of Quake II used unsigned integers, and the jake2 port
-tries to mimic Quake II's usage.
-jake2 consists of 133513 lines of code and can be found at \url{https://github.com/mbien/jake2}.
-We wrote 33 \<@Unsigned> annotations, referring to the
+implementation of Quake II used unsigned integers. jake2
+tries to mimic Quake II's usage and consists of 133513 lines of code that
+can be found at \url{https://github.com/mbien/jake2}.
+We wrote 33 annotations, referring to the
 C implementation when we had questions about the Java developers' intent.
 
 The largest inconsistency between the C and Java implementations is that
@@ -278,13 +251,22 @@ operations.  The Signedness Checker identified these for us.
 In some cases, either shift operation is correct because both have the same
 effect.  An example is Figure~\ref{fig:false-alarm}.  In the future, we
 plan to enhance the Signedness Checker so it does not issue this false
-positive warning.
+positive warning by analyzing masks to determine if different signedness shifts
+are functionally identical.
 
 We also identified one bug (Figure~\ref{fig:bug}):
 unsigned integers are printed by a function that does no special handling
 of unsigned values.  Thus, they are printed as
 if signed, which leads to erroneous output for values outside the signed
 positive range.
+
+Overall, the annotation process took roughly a quarter, though most of this time
+was spent understanding the code base and the intention of its developers. Using
+the tool was a simple part of this process as it only requires a developer to
+apply the \<@Unsigned> annotation where they might specify a type in another language,
+then use a modified javac supplied with the tool to compile.
+It is our opinion that a full time developer already familiar with the codebase
+could accomplish the same result less than a week.
 
 
 \section{Related Work}
@@ -311,19 +293,34 @@ We have developed and implemented a type system, the Signedness Type System, tha
 captures usage of signed and unsigned
 integers in Java programs.
 This type system enables developers to detect errors regarding unsigned
-integers at compile time, and guarantees that such errors cannot occur at
+integers at compile time and guarantees that such errors cannot occur at
 run time.
-In a case study. our type system proved easy to use and detected a
+In a case study our type system proved easy to use and detected a
 previously unknown bug.
 
-
-\begin{figure}
+\begin{figure}[t]
 \begin{lstlisting}
-// out.firstleafbrush and out.numleafbrushes
-// are unsigned integers.
-// The method Vargs::add(int) expects a signed
-// integer and therefore the Signedness Checker
-// issues a warning.
+// The Signedness Checker issues a warning for each of
+// these lines because a signed int is right shifted
+// with an unsigned right shift. In reality this is
+// fine because all of the introduced bits are masked off.
+
+sb.data[i++] = (byte) ((c >>> 8) & 0xff);
+sb.data[i++] = (byte) ((c >>> 16) & 0xff);
+sb.data[i++] = (byte) ((c >>> 24) & 0xff);
+
+\end{lstlisting}
+\vspace{-10pt}
+\caption{An example of code for which the Signedness Checker will issue a false
+alarm, from our case study of jake2.}
+\label{fig:false-alarm}
+\end{figure}
+
+\begin{figure}[h]
+\begin{lstlisting}
+// out.firstleafbrush and out.numleafbrushes are unsigned
+// ints. The method Vargs::add(int) expects a signed int
+// and therefore the Signedness Checker issues a warning.
 
 if (debugloadmap) {
   Com.DPrintf("|%8x|%6i|%6i|%6i|\n",
@@ -341,6 +338,7 @@ if (debugloadmap) {
 \label{fig:bug}
 \end{figure}
 
+\newpage
 \bibliographystyle{abbrv}
 \bibliography{bibstring-unabbrev,ernst,generals,invariants,types}
 
