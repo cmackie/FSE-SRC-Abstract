@@ -107,7 +107,7 @@ Misuse of unsigned values can be categorized as follows:
 \end{itemize}
 
 The first line of defense against most bugs is the compiler. When the
-compiler is unable to catch bugs it falls on the programmer to identify and
+compiler is unable to catch bugs, it falls on the programmer to identify and
 eliminate them, which is prone to human error. The Java compiler
 is not helpful in finding bugs related to using unsigned
 numbers because Java's unsigned
@@ -120,7 +120,7 @@ Our approach to detecting and preventing signedness errors is to use a type
 system. This has a number of benefits.
 %
 Compile-time checking permits developers
-to catch bugs before they become problems for their end-users.
+to catch bugs before they become problems for end-users.
 %
 Type systems are familiar to programmers, who understand how to use them
 and how to interpret their warning messages.
