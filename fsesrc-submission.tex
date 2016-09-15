@@ -14,7 +14,7 @@
 \newcommand{\todo}[1]{{\color{red}\bfseries [[#1]]}}
 
 % Fudge the line spacing a bit
-\renewcommand{\baselinestretch}{0.95}
+\renewcommand{\baselinestretch}{0.92}
 
 
 % Add page numbers, remove copyright box.  For submitted version only.
@@ -97,7 +97,9 @@ comparisons on unsigned integers, can lead to unexpected results.
 We call an operator ``insensitive'' if it produces a correct signed result
 when run on two signed values and a correct unsigned result
 when run on two unsigned values.  We call an operator ``sensitive'' if it
-produces incorrect results when run on two unsigned values.  For such
+produces incorrect results when run on two unsigned values. To compute the
+corresponding mathematical operation for a sensitive operator on unsigned values,
+a library call must be made.  For such
 operations, a programmer must run a different implementation depending on whether
 the operands are signed or unsigned.  See Figure~\ref{fig:operators} for
 an example of insensitive and sensitive operators.
@@ -154,7 +156,7 @@ byte div = y / x;
 
 We have defined a type system and implemented it in a tool
 called the Signedness Checker.
-The signedness type system has five type qualifiers
+The Signedness Type System has five type qualifiers
 (Figure~\ref{fig:type-hierarchy}).  Each type qualifier is written together
 with a base type; for example, \<@Unsigned int i> declares a
 variable named \<i> of type \<@Unsigned int>.
@@ -164,7 +166,8 @@ variable named \<i> of type \<@Unsigned int>.
     Signedness Checker has no estimate.  (This usually leads to a
     type-checking warning.)  It is also used for non-numeric
     values, which the Signedness Checker ignores.
-  \item \<@Unsigned> and \<@Signed> signify a value's signedness.
+  \item \<@Unsigned> signifies that a value is unsigned.
+  \item \<@Signed> signifies that a value is signed.
   \item \<@Constant> is for values known at compile time, such as
     manifest literals in the source code.  The programmer might intend to
     use them as signed or as unsigned values.  Even a negative literal may
@@ -198,7 +201,7 @@ specifically, here are the type introduction rules of our type system:
   \item Non-integral expressions use the top type, \<@UnknownSignedness>.
 \end{enumerate}
 
-The type rules of the signedness type system issue a warning if a program
+The type rules of the Signedness Type System issue a warning if a program
 might perform a computation using operands of incorrect or mixed signedness.
 These type rules are as follows:
 
@@ -234,7 +237,7 @@ We built our Signedness Checker implementation upon the
 Checker Framework~\cite{PapiACPE2008,DietlDEMS2011}, which enables the
 construction of pluggable type systems for Java.
 The Signedness Checker is distributed as part of the Checker Framework
-\url{http://CheckerFramework.org/}, starting with version 2.1.0.
+(\url{http://CheckerFramework.org/}), starting with version 2.1.0.
 
 % For number of statements, count the number of semicolons, less those on
 % lines starting with "package" or "import" or "//".
@@ -262,8 +265,9 @@ We evaluated the Signedness Checker by running it on jake2, a Java
 port of the popular '90s video game, Quake II\@.  The original C
 implementation of Quake II used unsigned integers. jake2
 tries to mimic Quake II's usage and consists of 133513 lines of code that
-can be found at \url{https://github.com/mbien/jake2}.
-We wrote 33 annotations, referring to the
+can be found at (\url{https://github.com/mbien/jake2}).
+Only a small subset of the codebase made use of unsigned integers, covering roughly
+10000 lines of code. We wrote 33 annotations, referring to the
 C implementation when we had questions about the Java developers' intent.
 
 The largest inconsistency between the C and Java implementations is that
@@ -285,14 +289,14 @@ positive range.
 We performed the case study in parallel with development and enhancement of
 the type system, spending a few hours a week over the course of several months.
 Almost all of our time on the case study
-was spent reverse-engineering the poorly-documented codebase to determine
+was spent reverse-engineering the poorly documented codebase to determine
 the intention of its developers. Using
 the Signedness Checker was simple:  it only requires a developer to
 write the \<@Unsigned> annotation where they would write \<unsigned
 int> in C,
 then run javac with an annotation processor to type-check the code.
 We believe a developer already familiar with the jake2 codebase could have
-learned the signedness type system,
+learned the Signedness Type System,
 written the 33 annotations, and discovered the bug in well under a week.
 
 \begin{figure}[t]
