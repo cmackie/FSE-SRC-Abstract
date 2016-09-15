@@ -13,15 +13,8 @@
 % \newcommand{\todo}[1]{\relax}
 \newcommand{\todo}[1]{{\color{red}\bfseries [[#1]]}}
 
-% Fudge the line spacing a bit
+% Change line spacing to fit in two pages.
 \renewcommand{\baselinestretch}{0.92}
-
-
-% Add page numbers, remove copyright box.  For submitted version only.
-% \pagenumbering{arabic}
-\makeatletter
-\def\@copyrightspace{\relax}
-\makeatother
 
 
 % At least 80% of every float page must be taken up by
@@ -59,8 +52,8 @@
 \def\<#1>{\codeid{#1}}
 \protected\def\codeid#1{\ifmmode{\mbox{\sf{#1}}}\else{\sf #1}\fi}
 
-
 \begin{document}
+\toappear{}
 
 \special{papersize=8.5in,11in}
 \setlength{\pdfpageheight}{\paperheight}
@@ -77,6 +70,29 @@ Christopher A. Mackie\\
 }
 
 \maketitle
+
+% CCS
+\begin{CCSXML}
+<ccs2012>
+<concept>
+<concept_id>10002944.10011123.10010577</concept_id>
+<concept_desc>General and reference~Reliability</concept_desc>
+<concept_significance>500</concept_significance>
+</concept>
+<concept>
+<concept_id>10011007.10010940.10011003.10011004</concept_id>
+<concept_desc>Software and its engineering~Software reliability</concept_desc>
+<concept_significance>500</concept_significance>
+</concept>
+</ccs2012>
+\end{CCSXML}
+
+\ccsdesc[500]{General and reference~Reliability}
+\ccsdesc[500]{Software and its engineering~Software reliability}
+
+\printccsdesc
+
+\keywords{type system, pluggable type checker, java, unsigned numbers}
 
 \section{Problem and Motivation}
 
@@ -101,8 +117,9 @@ produces incorrect results when run on two unsigned values. To compute the
 corresponding mathematical operation for a sensitive operator on unsigned values,
 a library call must be made.  For such
 operations, a programmer must run a different implementation depending on whether
-the operands are signed or unsigned.  See Figure~\ref{fig:operators} for
-an example of insensitive and sensitive operators.
+the operands are signed or unsigned.
+% See Figure~\ref{fig:operators} for
+% an example of insensitive and sensitive operators.
 
 Misuse of unsigned values can be categorized as follows:
 
@@ -132,6 +149,9 @@ and how to interpret their warning messages.
 
 % Figure appears late in the LaTeX file to prevent it from being placed in
 % the first column of the paper.
+
+\iffalse
+
 \begin{figure}[t]
 \vspace{-10pt}
 \begin{lstlisting}
@@ -152,6 +172,19 @@ byte div = y / x;
 \caption{Subtraction is an insensitive operator, and
   division is a sensitive operator.}
 \label{fig:operators}
+\end{figure}
+
+\fi
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.4\textwidth]{signedness}
+\vspace{-10pt}
+    \caption{The type qualifier hierarchy of the signedness annotations.
+The default annotation is \<@Signed>.
+Qualifiers in gray are used internally by the type system and should not be
+written by a programmer.}
+    \label{fig:type-hierarchy}
 \end{figure}
 
 We have defined a type system and implemented it in a tool
@@ -175,17 +208,6 @@ variable named \<i> of type \<@Unsigned int>.
     integer.
   \item \<@SignednessBottom> indicates dead code or the \<null> value.
 \end{itemize}
-
-\begin{figure}[t]
-    \centering
-    \includegraphics[width=0.4\textwidth]{signedness}
-\vspace{-10pt}
-    \caption{The type qualifier hierarchy of the signedness annotations.
-The default annotation is \<@Signed>.
-Qualifiers in gray are used internally by the type system and should not be
-written by a programmer.}
-    \label{fig:type-hierarchy}
-\end{figure}
 
 The programmer writes \<@Unsigned> type qualifiers on type uses
 in the program's source code.  Unannotated Java types
