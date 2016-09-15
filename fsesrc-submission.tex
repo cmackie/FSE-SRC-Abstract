@@ -113,9 +113,7 @@ comparisons on unsigned integers, can lead to unexpected results.
 We call an operator ``insensitive'' if it produces a correct signed result
 when run on two signed values and a correct unsigned result
 when run on two unsigned values.  We call an operator ``sensitive'' if it
-produces incorrect results when run on two unsigned values. To compute the
-corresponding mathematical operation for a sensitive operator on unsigned values,
-a library call must be made.  For such
+produces incorrect results when run on two unsigned values. For such
 operations, a programmer must run a different implementation depending on whether
 the operands are signed or unsigned.
 % See Figure~\ref{fig:operators} for
