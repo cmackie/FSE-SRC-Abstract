@@ -13,6 +13,9 @@
 % \newcommand{\todo}[1]{\relax}
 \newcommand{\todo}[1]{{\color{red}\bfseries [[#1]]}}
 
+% Fudge the line spacing a bit
+\renewcommand{\baselinestretch}{0.95}
+
 
 % Add page numbers, remove copyright box.  For submitted version only.
 % \pagenumbering{arabic}
@@ -80,7 +83,7 @@ Christopher A. Mackie\\
 Signed integers use the first bit of the machine representation to
 represent the sign of a value.  Unsigned integers use all
 bits of the machine representation to represent the magnitude of a value.
-Unsigned integers can 
+Unsigned integers can
 represent a larger range of positive numbers than signed integers, but
 cannot represent negative numbers.
 Unsigned integers are useful, so many programming languages support them;
@@ -150,7 +153,7 @@ byte div = y / x;
 \end{figure}
 
 We have defined a type system and implemented it in a tool
-called the Signedness Checker.  
+called the Signedness Checker.
 The signedness type system has five type qualifiers
 (Figure~\ref{fig:type-hierarchy}).  Each type qualifier is written together
 with a base type; for example, \<@Unsigned int i> declares a
@@ -170,7 +173,7 @@ variable named \<i> of type \<@Unsigned int>.
   \item \<@SignednessBottom> indicates dead code or the \<null> value.
 \end{itemize}
 
-\begin{figure}
+\begin{figure}[t]
     \centering
     \includegraphics[width=0.4\textwidth]{signedness}
 \vspace{-10pt}
@@ -289,39 +292,8 @@ write the \<@Unsigned> annotation where they would write \<unsigned
 int> in C,
 then run javac with an annotation processor to type-check the code.
 We believe a developer already familiar with the jake2 codebase could have
-learned the signedness type system, 
+learned the signedness type system,
 written the 33 annotations, and discovered the bug in well under a week.
-
-
-\section{Related Work}
-
-SmartFuzz~\cite{MolnarLW2009} generates tests that are intended to expose
-integer bugs, including signed/unsigned conversion.  For each program
-execution, it generates and solves a set of constraints that assigns each
-integer to a lattice containing Top, Signed, Unsigned, and Bottom.
-SmartFuzz incorrectly under-constrains some operations such as x86's
-\<IMUL>.  It uses Valgrind to partition integers into union-find sets and
-garbage-collects them, an implementation strategy pioneered by
-DynComp~\cite{GuoPME2006}.  They report finding 5 likely distinct bugs in C
-programs.  As with any testing tool, SmartFuzz gives no guarantee about
-future executions.  The same authors' CatchConv tool~\cite{MolnarW2007}
-also does run-time type inference, focusing on integer conversion errors
-and utilizing symbolic execution.  Our approach is more lightweight and
-precise and gives a guarantee, but it requires programmers to write a few
-annotations in their code.
-
-
-\section{Conclusions}
-
-We have developed and implemented a type system, the Signedness Type System, that
-captures usage of signed and unsigned
-integers in Java programs.
-This type system enables developers to detect errors regarding unsigned
-integers at compile time and guarantees that such errors cannot occur at
-run time.
-In a case study, our type system required little developer effort (just 33
-annotations written) and detected a
-previously-unknown bug.
 
 \begin{figure}[t]
 \begin{lstlisting}
@@ -364,6 +336,36 @@ if (debugloadmap) {
 \caption{Buggy code in jake2 that the Signedness Checker identified.}
 \label{fig:bug}
 \end{figure}
+
+\section{Related Work}
+
+SmartFuzz~\cite{MolnarLW2009} generates tests that are intended to expose
+integer bugs, including signed/unsigned conversion.  For each program
+execution, it generates and solves a set of constraints that assigns each
+integer to a lattice containing Top, Signed, Unsigned, and Bottom.
+SmartFuzz incorrectly under-constrains some operations such as x86's
+\<IMUL>.  It uses Valgrind to partition integers into union-find sets and
+garbage-collects them, an implementation strategy pioneered by
+DynComp~\cite{GuoPME2006}.  They report finding 5 likely distinct bugs in C
+programs.  As with any testing tool, SmartFuzz gives no guarantee about
+future executions.  The same authors' CatchConv tool~\cite{MolnarW2007}
+also does run-time type inference, focusing on integer conversion errors
+and utilizing symbolic execution.  Our approach is more lightweight and
+precise and gives a guarantee, but it requires programmers to write a few
+annotations in their code.
+
+
+\section{Conclusions}
+
+We have developed and implemented a type system, the Signedness Type System, that
+captures usage of signed and unsigned
+integers in Java programs.
+This type system enables developers to detect errors regarding unsigned
+integers at compile time and guarantees that such errors cannot occur at
+run time.
+In a case study, our type system required little developer effort (just 33
+annotations written) and detected a
+previously-unknown bug.
 
 \newpage
 \bibliographystyle{abbrv}
