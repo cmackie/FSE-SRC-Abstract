@@ -53,7 +53,6 @@
 \protected\def\codeid#1{\ifmmode{\mbox{\sf{#1}}}\else{\sf #1}\fi}
 
 \begin{document}
-\toappear{}
 
 \special{papersize=8.5in,11in}
 \setlength{\pdfpageheight}{\paperheight}
@@ -70,6 +69,13 @@ Christopher A. Mackie\\
 }
 
 \maketitle
+
+%copyright info
+\CopyrightYear{2016}
+\setcopyright{rightsretained}
+\conferenceinfo{FSE'16}{November 13-19, 2016, Seattle, WA, USA}
+\isbn{978-1-4503-4218-6/16/11}
+\doi{http://dx.doi.org/10.1145/2950290.2983978}
 
 % CCS
 \begin{CCSXML}
@@ -133,7 +139,7 @@ is not helpful in finding bugs related to using unsigned
 numbers because Java's unsigned
 integers are supported by a library rather than built into Java.
 
-
+\newpage
 \section{Approach and Uniqueness}
 
 Our approach to detecting and preventing signedness errors is to use a type
