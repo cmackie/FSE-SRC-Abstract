@@ -8,13 +8,14 @@
 \usepackage{pslatex}
 \usepackage{relsize}
 \usepackage[pageanchor=false]{hyperref}
+\usepackage{balance}
 
 %% Comment out one of these two definitions.
 % \newcommand{\todo}[1]{\relax}
 \newcommand{\todo}[1]{{\color{red}\bfseries [[#1]]}}
 
-% Change line spacing to fit in two pages.
-\renewcommand{\baselinestretch}{0.92}
+% Single space
+\renewcommand{\baselinestretch}{1}
 
 
 % At least 80% of every float page must be taken up by
@@ -32,7 +33,7 @@
     belowskip={1.0\baselineskip},
     columns=fixed,
     extendedchars=true,
-    breaklines=false,
+    breaklines=true,
     tabsize=4,
     prebreak=\raisebox{0ex}[0ex][0ex]{\ensuremath{\hookleftarrow}},
     showtabs=false,
@@ -53,10 +54,10 @@
 \protected\def\codeid#1{\ifmmode{\mbox{\sf{#1}}}\else{\sf #1}\fi}
 
 \begin{document}
+\toappear{}
 
-\special{papersize=8.5in,11in}
-\setlength{\pdfpageheight}{\paperheight}
-\setlength{\pdfpagewidth}{\paperwidth}
+\setlength{\paperheight}{11in}
+\setlength{\paperwidth}{8.5in}
 
 \title{Preventing Signedness Errors in Numerical Computations in Java}
 
@@ -70,12 +71,14 @@ Christopher A. Mackie\\
 
 \maketitle
 
-%copyright info
-\CopyrightYear{2016}
-\setcopyright{rightsretained}
-\conferenceinfo{FSE'16}{November 13-19, 2016, Seattle, WA, USA}
-\isbn{978-1-4503-4218-6/16/11}
-\doi{http://dx.doi.org/10.1145/2950290.2983978}
+\section*{ABSTRACT}
+We have developed and implemented a type system, the Signedness Type System,
+that captures usage of signed and unsigned integers in Java programs. This
+type system enables developers to detect errors regarding unsigned integers at
+compile time, and guarantees that such errors cannot occur at run time. In a
+case study. our type system proved easy to use and detected a previously unknown
+bug. Our type system is implemented as the Signedness Checker and will be
+available with the Checker Framework (http://CheckerFramework.org/).
 
 % CCS
 \begin{CCSXML}
@@ -103,18 +106,16 @@ Christopher A. Mackie\\
 \section{Problem and Motivation}
 
 Signed integers use the first bit of the machine representation to
-represent the sign of a value.  Unsigned integers use all
-bits of the machine representation to represent the magnitude of a value.
-Unsigned integers can
-represent a larger range of positive numbers than signed integers, but
-cannot represent negative numbers.
+encode the sign of a value, whereas unsigned integers use all
+bits to represent the magnitude of a value.
+Unsigned integers cover a larger range of positive numbers, but cannot represent
+negative numbers.
 Unsigned integers are useful, so many programming languages support them;
 for example, Java 8 introduced utility methods for unsigned
-integers~\cite{JDK8UnsignedIntegerArithmetic2012}.  However, unsigned
-integers are also
-error-prone:  using an unsigned integer where a signed
-one is expected, or performing certain arithmetic operations or
-comparisons on unsigned integers, can lead to unexpected results.
+integers~\cite{JDK8UnsignedIntegerArithmetic2012}.  However, they are also
+error-prone:  using one where a signed
+integer is expected, or performing certain arithmetic operations on unsigned
+integers, can lead to unexpected results.
 
 We call an operator ``insensitive'' if it produces a correct signed result
 when run on two signed values and a correct unsigned result
@@ -128,8 +129,8 @@ the operands are signed or unsigned.
 Misuse of unsigned values can be categorized as follows:
 
 \begin{itemize}\itemsep 0pt \parskip 0pt
-  \item Using a sensitive operator with operands of opposite signedness to the implementation of the operator.
-  \item Mixing signed and unsigned arguments to any operator, sensitive or insensitive.
+  \item Using a sensitive operator with unsigned operands.
+  \item Mixing signed and unsigned arguments to any operator.
 \end{itemize}
 
 The first line of defense against most bugs is the compiler. When the
@@ -139,7 +140,6 @@ is not helpful in finding bugs related to using unsigned
 numbers because Java's unsigned
 integers are supported by a library rather than built into Java.
 
-\newpage
 \section{Approach and Uniqueness}
 
 Our approach to detecting and preventing signedness errors is to use a type
@@ -149,74 +149,45 @@ Compile-time checking permits developers
 to catch bugs before they become problems for end-users.
 %
 Type systems are familiar to programmers, who understand how to use them
-and how to interpret their warning messages.
+and interpret their warning messages.
 
 % Figure appears late in the LaTeX file to prevent it from being placed in
 % the first column of the paper.
 
-\iffalse
-
-\begin{figure}[t]
-\vspace{-10pt}
-\begin{lstlisting}
-byte x = 0xFF; // Signed -1, Unsigned 255
-byte y = 0xFE; // Signed -2, Unsigned 254
-
-byte sub = x - y;
-// Result is 1, which is correct when:
-//  * x, y, and sub are signed.
-//  * x, y, and sub are unsigned.
-
-byte div = y / x;
-// Result is 2.
-//  * Correct for signed x, y, and div.
-//  * Incorrect for unsigned x, y, and div.
-\end{lstlisting}
-\vspace{-10pt}
-\caption{Subtraction is an insensitive operator, and
-  division is a sensitive operator.}
-\label{fig:operators}
-\end{figure}
-
-\fi
-
 \begin{figure}[t]
     \centering
-    \includegraphics[width=0.4\textwidth]{signedness}
+    \includegraphics[width=0.35\textwidth]{signedness}
 \vspace{-10pt}
-    \caption{The type qualifier hierarchy of the signedness annotations.
-The default annotation is \<@Signed>.
-Qualifiers in gray are used internally by the type system and should not be
-written by a programmer.}
+    \caption{The type qualifier hierarchy of our type system.
+Qualifiers in gray are used internally, and should not be written.}
     \label{fig:type-hierarchy}
 \end{figure}
 
 We have defined a type system and implemented it in a tool
 called the Signedness Checker.
-The Signedness Type System has five type qualifiers
-(Figure~\ref{fig:type-hierarchy}).  Each type qualifier is written together
+This type system has five type qualifiers
+(Figure~\ref{fig:type-hierarchy}).  Each is written together
 with a base type; for example, \<@Unsigned int i> declares a
 variable named \<i> of type \<@Unsigned int>.
 
 \begin{itemize}\itemsep 0pt \parskip 0pt
-  \item \<@UnknownSignedness> indicates a value for which the
-    Signedness Checker has no estimate.  (This usually leads to a
-    type-checking warning.)  It is also used for non-numeric
-    values, which the Signedness Checker ignores.
+  \item \<@UnknownSignedness> indicates a value for which our tool
+   has no estimate.  (This usually leads to a
+    warning.)  It is also used for non-numeric
+    values, which our tool ignores.
   \item \<@Unsigned> signifies that a value is unsigned.
   \item \<@Signed> signifies that a value is signed.
   \item \<@Constant> is for values known at compile time, such as
-    manifest literals in the source code.  The programmer might intend to
+    manifest literals.  The programmer might intend to
     use them as signed or as unsigned values.  Even a negative literal may
-    be used as a convenience placeholder for a large positive unsigned
+    be used as a placeholder for a large positive unsigned
     integer.
   \item \<@SignednessBottom> indicates dead code or the \<null> value.
 \end{itemize}
 
 The programmer writes \<@Unsigned> type qualifiers on type uses
 in the program's source code.  Unannotated Java types
-are given a default qualifier.  More
-specifically, here are the type introduction rules of our type system:
+are given a default qualifier. Here are our system's type introduction rules:
 
 \begin{enumerate}\itemsep 0pt \parskip 0pt
   \item If the user wrote a type qualifier, use it.
@@ -224,7 +195,7 @@ specifically, here are the type introduction rules of our type system:
     \<@Constant>.
     Integral types are \<char>, \<byte>, \<short>, \<int>, \<long>, \<Integer>, and \<Long>.
   \item Other integral expressions use \<@Signed>.
-  \item Non-integral expressions use the top type, \<@UnknownSignedness>.
+  \item Non-integral expressions use \<@UnknownSignedness>.
 \end{enumerate}
 
 The type rules of the Signedness Type System issue a warning if a program
@@ -232,7 +203,7 @@ might perform a computation using operands of incorrect or mixed signedness.
 These type rules are as follows:
 
 \begin{itemize}\itemsep 0pt \parskip 0pt
-  \item Unsigned values may not be used as operands to sensitive
+  \item Unsigned values may not be used with sensitive
     operators.
   \item With the exception of shifts, no operator may operate on a mix of
     signed and unsigned values.
@@ -240,30 +211,25 @@ These type rules are as follows:
   \item Arithmetic right shifts may only be applied to signed values.
 \end{itemize}
 
-An insensitive operator is allowed to be used on either signed or unsigned
-values, so long as all the operands are of the same type.  In general, an operator's
-result type is the least upper bound of its argument types.
-
-
 \section{Background and Implementation}
 
 Our goal is to build a verification tool that guarantees that software is
 free of bugs related to unsigned integers. To achieve this, our approach
 must be sound:  if it issues no warnings, then the program must be free of
 bugs.
-Any sound analysis sometimes issues false positive alarms --- warnings about
-code that will not actually go wrong at run time.  This occurs when the
+Any sound analysis sometimes issues false positives --- warnings about
+code that will not go wrong at run time.  This occurs when the
 Signedness Checker cannot prove that the code is correct.  One example is
 when it conservatively estimates a value to be \<@UnknownSignedness>, but
 at run time the value is always (say) \<@Signed> due to application invariants.
 See Figure~\ref{fig:false-alarm}
-for another example of code for which the Signedness Checker may issue a false alarm.
+for an example of code for which our tool may issue a false alarm.
 
 We built our Signedness Checker implementation upon the
 Checker Framework~\cite{PapiACPE2008,DietlDEMS2011}, which enables the
 construction of pluggable type systems for Java.
 The Signedness Checker is distributed as part of the Checker Framework
-(\url{http://CheckerFramework.org/}), starting with version 2.1.0.
+(\url{http://CheckerFramework.org/}).
 
 % For number of statements, count the number of semicolons, less those on
 % lines starting with "package" or "import" or "//".
@@ -275,10 +241,10 @@ The Signedness Checker is distributed as part of the Checker Framework
 Our pluggable type system implementation consists of fewer than 100
 statements.  Its biggest component is a run-time library that provides
 JDK~8 unsignedness functionality to earlier versions of Java.  The
-type-checker proper consists of the following parts:
+type-checker consists of the following parts:
 
 \begin{itemize}\itemsep 0pt \parskip 0pt
-  \item Type qualifiers are implemented declaratively as Java 8 type
+  \item Qualifiers are implemented as Java 8 type
     annotations~\cite{JSR308-PFD}.
   \item Type introduction rules are defined procedurally.
   \item Type rules are enforced by a traversal of the syntax tree.
@@ -287,7 +253,7 @@ type-checker proper consists of the following parts:
 
 \section{Results and Contributions}
 
-We evaluated the Signedness Checker by running it on jake2, a Java
+We evaluated our tool by running it on jake2, a Java
 port of the popular '90s video game, Quake II\@.  The original C
 implementation of Quake II used unsigned integers. jake2
 tries to mimic Quake II's usage and consists of 133513 lines of code that
@@ -328,8 +294,8 @@ written the 33 annotations, and discovered the bug in well under a week.
 \begin{figure}[t]
 \begin{lstlisting}
 // The Signedness Checker issues 3 warnings because
-// unsigned right shift changes its argument's sign by
-// filling in zeroes in the most significant bits.
+// unsigned right shift changes its argument's sign
+// by filling in zeroes in the most significant bits.
 // This doesn't matter in the below code snippet,
 // because all of the introduced bits are masked off.
 
@@ -347,9 +313,8 @@ alarm, from our case study of jake2.}
 
 \begin{figure}[t]
 \begin{lstlisting}
-// out.firstleafbrush and out.numleafbrushes are unsigned
-// ints. The method Vargs::add(int) expects a signed int
-// and therefore the Signedness Checker issues a warning.
+// out.firstleafbrush and out.numleafbrushes are
+// unsigned. Vargs::add(int) expects a signed int.
 
 if (debugloadmap) {
   Com.DPrintf("|%8x|%6i|%6i|%6i|\n",
@@ -363,7 +328,7 @@ if (debugloadmap) {
 
 \end{lstlisting}
 \vspace{-10pt}
-\caption{Buggy code in jake2 that the Signedness Checker identified.}
+\caption{Buggy code in jake2 that our tool identified.}
 \label{fig:bug}
 \end{figure}
 
@@ -399,6 +364,8 @@ previously-unknown bug.
 
 \newpage
 \bibliographystyle{abbrv}
+
+\balance
 \bibliography{bibstring-unabbrev,ernst,generals,invariants,types}
 
 \end{document}
