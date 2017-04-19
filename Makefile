@@ -1,6 +1,6 @@
 fsesrc-submission.pdf: bib-update
 	pdflatex fsesrc-submission.tex
-	bibtex fsesrc-submission
+	bibtex -min-crossrefs=9999 fsesrc-submission
 	pdflatex fsesrc-submission.tex
 	pdflatex fsesrc-submission.tex
 
